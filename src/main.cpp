@@ -24,7 +24,7 @@ void processInput(GLFWwindow *window, GLfloat vertices[], GLuint VAO, GLuint VBO
         
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
     {
-        *c += 0.01;
+        *c += 0.1f;
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
