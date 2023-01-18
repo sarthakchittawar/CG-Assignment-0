@@ -17,7 +17,7 @@ using namespace std;
 int numOfSides;
 int toggle = 0;
 
-void processInput(GLFWwindow *window, GLfloat vertices[], GLuint VAO, GLuint VBO, GLuint EBO, GLuint shaderProgram, GLfloat *c, glm::vec3 &cameraPos, glm::vec3 &cameraFront, glm::vec3 &cameraUp, GLfloat *camx, GLfloat *camy, GLfloat *camz)
+void processInput(GLFWwindow *window, GLfloat vertices[], GLuint VAO, GLuint VBO, GLuint EBO, GLuint shaderProgram, GLfloat *c, glm::vec3 &cPos, glm::vec3 &cLook, glm::vec3 &cUp, GLfloat *camx, GLfloat *camy, GLfloat *camz)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -52,27 +52,27 @@ void processInput(GLFWwindow *window, GLfloat vertices[], GLuint VAO, GLuint VBO
     }
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
     {
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * (float)CAMERA_SPEED;
+        cPos -= glm::normalize(glm::cross(cLook, cUp)) * CAMERA_SPEED;
     }
     if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
     {
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * (float)CAMERA_SPEED;
+        cPos += glm::normalize(glm::cross(cLook, cUp)) * CAMERA_SPEED;
     }
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
-        cameraPos -= cameraUp * (float)CAMERA_SPEED;
+        cPos -= cUp * CAMERA_SPEED;
     }
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
-        cameraPos += cameraUp * (float)CAMERA_SPEED;
+        cPos += cUp * CAMERA_SPEED;
     }
     if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
     {
-        cameraPos += cameraFront * (float)CAMERA_SPEED;
+        cPos += cLook * CAMERA_SPEED;
     }
     if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS)
     {
-        cameraPos -= cameraFront * (float)CAMERA_SPEED;
+        cPos -= cLook * CAMERA_SPEED;
     }
     if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
     {
@@ -104,9 +104,9 @@ void processInput(GLFWwindow *window, GLfloat vertices[], GLuint VAO, GLuint VBO
     if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
     {
         *c = 0.0, *camx = 0.0, *camy = 0.0, *camz = 2.0;
-        cameraPos   = glm::vec3(0.0f, 0.0f,  0.0f);
-        cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-        cameraUp    = glm::vec3(0.0f, 1.0f,  0.0f);
+        cPos = glm::vec3(0.0f, 0.0f,  0.0f);
+        cLook = glm::vec3(0.0f, 0.0f, -1.0f);
+        cUp = glm::vec3(0.0f, 1.0f,  0.0f);
     }
 }
 
@@ -294,9 +294,9 @@ int main()
     // Accept fragment if it closer to the camera than the former one
     glDepthFunc(GL_LESS);
 
-    glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f,  0.0f);
-    glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f,  0.0f);
+    glm::vec3 cPos = glm::vec3(0.0f, 0.0f,  0.0f);
+    glm::vec3 cLook = glm::vec3(0.0f, 0.0f, -1.0f);
+    glm::vec3 cUp = glm::vec3(0.0f, 1.0f,  0.0f);
 
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), SCREEN_WIDTH / SCREEN_HEIGHT, 0.1f, 100.0f);
 
@@ -311,7 +311,7 @@ int main()
 
     while(!glfwWindowShouldClose(window))
     {
-        processInput(window, vertices, VAO, VBO, EBO, shaderProgram, &yrot, cameraPos, cameraFront, cameraUp, &camx, &camy, &camz);
+        processInput(window, vertices, VAO, VBO, EBO, shaderProgram, &yrot, cPos, cLook, cUp, &camx, &camy, &camz);
 
         glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -324,8 +324,8 @@ int main()
         view = glm::lookAt(glm::vec3(0.0f - camx, 0.0f - camy, 0.03f - camz), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 
         glm::mat4 viewtrans = glm::mat4(1.0f);
-        viewtrans = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        // camera moves acc to global coords, fix it
+        viewtrans = glm::lookAt(cPos, cPos + cLook, cUp);
+        
         int viewLocation = glGetUniformLocation(shaderProgram, "view");
         glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
         int transLocation = glGetUniformLocation(shaderProgram, "transview");
